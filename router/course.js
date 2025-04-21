@@ -1,6 +1,8 @@
 const { Router } = require("express");
-
 const courseRouter = Router();
+const { CourseModel } = require("../db");
+const { PurchaseModel } = require("../db");
+const { ContentModel } = require("../db");
 
 courseRouter.get("/preview", function (req, res) {
   //seeing the available courses

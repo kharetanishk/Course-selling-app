@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const ObjectId = mongoose.ObjectId;
+const ObjectId = mongoose.Types.ObjectId;
 
 //user schema
 const User = new Schema({
@@ -48,9 +48,9 @@ const ContentModel = mongoose.model("courseContent", ContentOfCourse);
 
 //EXPORTING THE MODELS
 module.exports = {
-  UserModel: UserModel,
-  AdminModel: AdminModel,
-  CourseModel: CourseModel,
-  PurchaseModel: PurchaseModel,
-  ContentModel: ContentModel,
+  UserModel,
+  AdminModel,
+  CourseModel,
+  PurchaseModel,
+  ContentModel,
 };

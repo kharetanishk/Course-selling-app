@@ -30,10 +30,7 @@ adminRouter.post(
     if (!parseData.success) {
       const popErrorMessage = parseData.error.issues[0];
       return res.status(400).json({
-        error: `${
-          popErrorMessage.message.trim().toLocaleUpperCase() +
-          popErrorMessage.path[0].trim().toLocaleUpperCase()
-        }`,
+        error: `${popErrorMessage.message.trim().toLocaleUpperCase()}`,
       });
     }
     //INPUTS THAT USER WILL POST
@@ -44,12 +41,18 @@ adminRouter.post(
     const hashedPassword = await bcrypt.hash(password, 12);
     // console.log(hashedPassword);
     //ADDING THE INPUTS TO THE DATABASE
-    await AdminModel.create({
-      email: email,
-      password: hashedPassword.toString(),
-      firstName: firstName,
-      lastName: lastName,
-    });
+    try {
+      await AdminModel.create({
+        email: email,
+        password: hashedPassword.toString(),
+        firstName: firstName,
+        lastName: lastName,
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: "Internal server error",
+      });
+    }
 
     //CREATION OF THE NEW USER DONE
     res.status(200).json({

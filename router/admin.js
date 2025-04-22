@@ -90,6 +90,7 @@ adminRouter.post(
 
 adminRouter.post("/course", authMiddleware(secret), async function (req, res) {
   const creatorId = req.userId;
+  console.log(creatorId);
   const creatorName = creatorId.firstName;
 
   const { title, description, price, imageUrl } = req.body;
@@ -101,6 +102,7 @@ adminRouter.post("/course", authMiddleware(secret), async function (req, res) {
       imageUrl: imageUrl,
       creatorId: creatorId,
     });
+
     res.status(200).json({
       message: "Course have been created",
       courseId: course._id,
@@ -113,11 +115,14 @@ adminRouter.put("/course", authMiddleware(secret), async function (req, res) {
   const { title, description, price, imageUrl } = req.body;
   const creatorId = req.userId;
   const creatorName = creatorId.firstName;
-  console.log(course._id);
+
   try {
+    const user = await CourseModel.findOne({
+      creatorId: creatorId,
+    });
     const course = await CourseModel.updateOne(
       {
-        _id: course._id,
+        _id: user._id,
         creatorId: creatorId,
       },
       {
@@ -146,16 +151,15 @@ adminRouter.get(
   authMiddleware(secret),
   async function (req, res) {
     const creatorId = req.userId;
-    const creatorName = creatorId.firstName;
+    console.log(creatorId);
     try {
       const course = await CourseModel.find({
         creatorId: creatorId,
-        courseId: course._id,
       });
+      console.log(course);
       res.status(200).json({
-        message: `here are your courses sir ${creatorName}`,
+        message: `here are your courses sir`,
         courses: course,
-        creatorName: creatorName,
       });
     } catch (error) {
       res.status(500).json({

@@ -23,12 +23,6 @@ const Admin = new Schema({
   password: String,
   firstName: String,
   lastName: String,
-  creations: [
-    {
-      type: mongoose.Types.ObjectId,
-      ref: "Course",
-    },
-  ],
 });
 //course schema
 const Course = new Schema({

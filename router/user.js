@@ -7,7 +7,8 @@ require("dotenv").config;
 const jwt = require("jsonwebtoken");
 const { checkingMiddleware } = require("../Middleware/check");
 const { checkinSignInMiddleware } = require("../Middleware/checksignin");
-const secret = process.env.JWT_SECRET;
+const { authMiddleware } = require("../Middleware/auth");
+const secret = process.env.JWT_USER_PASSWORD;
 
 userRouter.post(
   "/signup",
@@ -60,10 +61,11 @@ userRouter.post(
   checkinSignInMiddleware(UserModel),
   async function (req, res) {
     const { email, password } = req.body;
+    const existingUser = req.existingUser;
     try {
       const token = jwt.sign(
         {
-          email: email,
+          id: existingUser._id,
         },
         secret
       );
@@ -80,7 +82,7 @@ userRouter.post(
   }
 );
 
-userRouter.get("/purchases", function (req, res) {
+userRouter.get("/purchases", authMiddleware(secret), function (req, res) {
   res.send("user purchased courses");
 });
 

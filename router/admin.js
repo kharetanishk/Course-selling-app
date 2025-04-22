@@ -2,12 +2,13 @@ const { Router } = require("express");
 const adminRouter = Router();
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-const secret = process.env.JWT_SECRET;
-const { AdminModel } = require("../db");
+const secret = process.env.JWT_ADMIN_PASSWORD;
+const { AdminModel, CourseModel } = require("../db");
 const { z } = require("zod");
 const bcrypt = require("bcrypt");
 const { checkingMiddleware } = require("../Middleware/check");
 const { checkinSignInMiddleware } = require("../Middleware/checksignin");
+const { authMiddleware } = require("../Middleware/auth");
 
 adminRouter.post(
   "/signup",
@@ -37,9 +38,7 @@ adminRouter.post(
     const { email, password, firstName, lastName } = req.body;
 
     //HASHING THE PASSWORD
-    // console.log(password);
     const hashedPassword = await bcrypt.hash(password, 12);
-    // console.log(hashedPassword);
     //ADDING THE INPUTS TO THE DATABASE
     try {
       await AdminModel.create({
@@ -48,52 +47,124 @@ adminRouter.post(
         firstName: firstName,
         lastName: lastName,
       });
+      console.log("New user logged up");
+      res.status(200).json({
+        message: `YOU ARE SIGNED UP ${firstName}`,
+      });
     } catch (error) {
       res.status(500).json({
         error: "Internal server error",
       });
     }
-
-    //CREATION OF THE NEW USER DONE
-    res.status(200).json({
-      message: `YOU ARE SIGNED UP ${firstName}`,
-    });
   }
 );
 
-adminRouter.post("/signin", checkinSignInMiddleware(AdminModel), (req, res) => {
-  const { email, password } = req.body;
-  //AFTER CHECKING THE USER SHOULD ASSIGN WITH A TOKEN
+adminRouter.post(
+  "/signin",
+  checkinSignInMiddleware(AdminModel),
+  async function (req, res) {
+    const { email, password } = req.body;
+    //AFTER CHECKING THE USER SHOULD ASSIGN WITH A TOKEN
+
+    try {
+      const existingUser = req.existingUser;
+      const token = jwt.sign(
+        {
+          id: existingUser._id,
+        },
+        secret
+      );
+      //DO COKKIE LOGIC IN FUTURE
+      res.status(200).json({
+        message: `Welcome To the CourseLelo App `,
+        token,
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: "Server error in admin.js",
+        error,
+      });
+    }
+  }
+);
+
+adminRouter.post("/course", authMiddleware(secret), async function (req, res) {
+  const creatorId = req.userId;
+  const creatorName = creatorId.firstName;
+
+  const { title, description, price, imageUrl } = req.body;
   try {
-    const token = jwt.sign(
-      {
-        email,
-      },
-      secret
-    );
+    const course = await CourseModel.create({
+      title: title,
+      description: description,
+      price: price,
+      imageUrl: imageUrl,
+      creatorId: creatorId,
+    });
     res.status(200).json({
-      message: `Welcome To the CourseLelo App `,
-      token,
+      message: "Course have been created",
+      courseId: course._id,
+      creatorName: creatorName,
+    });
+  } catch (error) {}
+});
+
+adminRouter.put("/course", authMiddleware(secret), async function (req, res) {
+  const { title, description, price, imageUrl } = req.body;
+  const creatorId = req.userId;
+  const creatorName = creatorId.firstName;
+  console.log(course._id);
+  try {
+    const course = await CourseModel.updateOne(
+      {
+        _id: course._id,
+        creatorId: creatorId,
+      },
+      {
+        title: title,
+        description: description,
+        price: price,
+        imageUrl: imageUrl,
+      }
+    );
+    console.log("the course have been updated");
+    res.status(200).json({
+      message: "the course have been updated",
+      courseId: course._id,
+      creatorName: creatorName,
     });
   } catch (error) {
-    res.status(500).json({
-      error: "Server error in admin.js",
+    res.status(400).json({
+      error: "some error while updating the course",
       error,
     });
   }
 });
 
-adminRouter.post("/course", (req, res) => {
-  res.send("adming launched a new course");
-});
-
-adminRouter.put("/course", (req, res) => {
-  res.send("admin has updated the course");
-});
-
-adminRouter.get("/course/bulk", (req, res) => {
-  res.send("admin wants to know about his courses");
-});
+adminRouter.get(
+  "/course/bulk",
+  authMiddleware(secret),
+  async function (req, res) {
+    const creatorId = req.userId;
+    const creatorName = creatorId.firstName;
+    try {
+      const course = await CourseModel.find({
+        creatorId: creatorId,
+        courseId: course._id,
+      });
+      res.status(200).json({
+        message: `here are your courses sir ${creatorName}`,
+        courses: course,
+        creatorName: creatorName,
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: "some error while getting the courses",
+        error,
+      });
+    }
+  }
+);
 
 module.exports = {
   adminRouter: adminRouter,

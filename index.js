@@ -6,14 +6,15 @@ const { courseRouter } = require("./router/course");
 const { userRouter } = require("./router/user");
 const { adminRouter } = require("./router/admin");
 const mongoUrl = process.env.MONGO_URL;
+const cors = require("cors");
 
 const app = express();
 const port = 3000;
 
 app.use(express.json());
-//routers
-app.use("/api/v1/user", userRouter); //this means all the request from
-//  the user path will handle by userRouter
+
+//ROUTERS
+app.use("/api/v1/user", userRouter);
 app.use("/api/v1/course", courseRouter);
 app.use("/api/v1/admin", adminRouter);
 

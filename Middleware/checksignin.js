@@ -5,7 +5,7 @@ function checkinSignInMiddleware(databasemodels) {
     const { email, password } = req.body;
     try {
       const existingUser = await databasemodels.findOne({ email: email });
-      console.log(existingUser);
+      req.existingUser = existingUser;
 
       if (!existingUser) {
         return res.status(404).json({

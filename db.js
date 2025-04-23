@@ -49,16 +49,16 @@ const ContentOfCourse = new Schema({
 });
 //purchases
 const Purchase = new Schema({
-  courseId: [
-    {
-      type: mongoose.Types.ObjectId,
-      ref: "Course",
-    },
-  ],
   userId: [
     {
       type: mongoose.Types.ObjectId,
       ref: "User",
+    },
+  ],
+  courseId: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: "Course",
     },
   ],
 });

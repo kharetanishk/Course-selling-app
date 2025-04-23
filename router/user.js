@@ -102,10 +102,18 @@ userRouter.get("/purchase", authMiddleware(secret), async function (req, res) {
     const course = await PurchaseModel.find({
       userId: userId,
     });
+    const courseId = await CourseModel.findById({
+      _id: course[0].courseId[0],
+    });
+
+    const courseName = courseId.title;
+    const coursePrice = courseId.price;
 
     res.status(200).json({
       message: "Here are the courses you have purchased",
       course: course,
+      courseName: courseName,
+      coursePrice: coursePrice,
     });
   } catch (error) {
     res.status(500).json({

@@ -9,6 +9,7 @@ const bcrypt = require("bcrypt");
 const { checkingMiddleware } = require("../Middleware/check");
 const { checkinSignInMiddleware } = require("../Middleware/checksignin");
 const { authMiddleware } = require("../Middleware/auth");
+const course = require("./course");
 
 adminRouter.post(
   "/signup",
@@ -87,6 +88,48 @@ adminRouter.post(
     }
   }
 );
+
+// USING THIS ROUTE THE ADMIN WILL GET ALL HIS/HER CREATED COURSES INFORMATION
+adminRouter.get("/mycourse", authMiddleware(secret), async function (req, res) {
+  const creatorId = req.userId;
+  // console.log(creatorId);
+
+  try {
+    const courses = await CourseModel.find({
+      creatorId: creatorId,
+    });
+    console.log(courses);
+
+    const admin = await AdminModel.find({
+      _id: creatorId,
+    });
+
+    //Essentials
+    const adminName = admin.map((array) => array.firstName);
+    const courseName = courses.map((array) => array.title);
+    const priceOfCourse = courses.map((array) => array.price);
+    const courseId = courses.map((array) => array._id);
+
+    //output everything about the creaton of the course
+    res.status(200).json({
+      message: "HERE ARE THE COURSES THAT I HAVE (ADMIN) CREATED",
+      DETAILS: [
+        {
+          adminName: adminName,
+          courseName: courseName,
+          priceOfCourse: priceOfCourse,
+          courseId: courseId,
+          creatorId: creatorId,
+        },
+      ],
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: "THE SERVER SIDE IS BUSY",
+      error,
+    });
+  }
+});
 
 adminRouter.post("/course", authMiddleware(secret), async function (req, res) {
   const creatorId = req.userId;

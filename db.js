@@ -9,7 +9,7 @@ const User = new Schema({
   lastName: String,
   PurchasedCourses: [
     {
-      type: mongoose.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Purchase",
     },
   ],
@@ -30,7 +30,7 @@ const Course = new Schema({
   imageUrl: String,
   creatorId: [
     {
-      type: mongoose.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Admin",
     },
   ],
@@ -40,7 +40,7 @@ const ContentOfCourse = new Schema({
   content: String,
   courseId: [
     {
-      type: mongoose.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Course",
     },
   ],
@@ -49,13 +49,13 @@ const ContentOfCourse = new Schema({
 const Purchase = new Schema({
   userId: [
     {
-      type: mongoose.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
   ],
   courseId: [
     {
-      type: mongoose.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Course",
     },
   ],

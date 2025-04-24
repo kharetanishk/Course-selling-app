@@ -106,6 +106,7 @@ userRouter.post("/purchase", authMiddleware(secret), async function (req, res) {
 
 userRouter.get("/purchase", authMiddleware(secret), async function (req, res) {
   const userId = req.userId;
+  console.log(userId);
   try {
     const course = await PurchaseModel.find({
       userId: userId,

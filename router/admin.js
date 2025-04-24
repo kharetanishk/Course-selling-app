@@ -3,7 +3,7 @@ const adminRouter = Router();
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const secret = process.env.JWT_ADMIN_PASSWORD;
-const { AdminModel, CourseModel } = require("../db");
+const { AdminModel, CourseModel, FreeCourseModel } = require("../db");
 const { z } = require("zod");
 const bcrypt = require("bcrypt");
 const { checkingMiddleware } = require("../Middleware/check");
@@ -11,6 +11,7 @@ const { checkinSignInMiddleware } = require("../Middleware/checksignin");
 const { authMiddleware } = require("../Middleware/auth");
 const course = require("./course");
 
+//THIS ROUTE WILL SIGN UP THE ADMIN
 adminRouter.post(
   "/signup",
   checkingMiddleware(AdminModel),
@@ -60,6 +61,7 @@ adminRouter.post(
   }
 );
 
+//THIS ROUTE WILL SIGN IN THE ADMIN
 adminRouter.post(
   "/signin",
   checkinSignInMiddleware(AdminModel),
@@ -88,6 +90,46 @@ adminRouter.post(
     }
   }
 );
+
+//THIS ROUTE WILL HELP THE ADMIN TO CREATE COURSES
+adminRouter.post("/course", authMiddleware(secret), async function (req, res) {
+  const creatorId = req.userId;
+  // console.log(creatorId);
+
+  const { title, description, price, imageUrl } = req.body;
+  try {
+    const course = await CourseModel.create({
+      title: title,
+      description: description,
+      price: price,
+      imageUrl: imageUrl,
+      creatorId: creatorId,
+    })
+      .then((value) => {
+        //WILL TAKE CARE OF FREE COURSES IF AVAILABLE
+        if (value.price === 0) {
+          FreeCourseModel.create({
+            courseName: value.title,
+            courseId: value._id,
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(
+          `THERE IS AN ERROR WHILE CREATING THE COURSE BY ADMIN CHECK THE PROMISE ${error}`
+        );
+      });
+
+    res.status(200).json({
+      message: "Course have been created",
+      course,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: "SERVER ISSUES IN CREATING THE COURSES",
+    });
+  }
+});
 
 // USING THIS ROUTE THE ADMIN WILL GET ALL HIS/HER CREATED COURSES INFORMATION
 adminRouter.get("/mycourse", authMiddleware(secret), async function (req, res) {
@@ -129,29 +171,6 @@ adminRouter.get("/mycourse", authMiddleware(secret), async function (req, res) {
       error,
     });
   }
-});
-
-adminRouter.post("/course", authMiddleware(secret), async function (req, res) {
-  const creatorId = req.userId;
-  console.log(creatorId);
-  const creatorName = creatorId.firstName;
-
-  const { title, description, price, imageUrl } = req.body;
-  try {
-    const course = await CourseModel.create({
-      title: title,
-      description: description,
-      price: price,
-      imageUrl: imageUrl,
-      creatorId: creatorId,
-    });
-
-    res.status(200).json({
-      message: "Course have been created",
-      courseId: course._id,
-      creatorName: creatorName,
-    });
-  } catch (error) {}
 });
 
 adminRouter.put("/course", authMiddleware(secret), async function (req, res) {

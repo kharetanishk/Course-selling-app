@@ -61,12 +61,22 @@ const Purchase = new Schema({
   ],
 });
 
+const FreeCourses = new Schema({
+  courseName: String,
+  courseId: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Course",
+    },
+  ],
+});
 //CREATING MODEL
 const UserModel = mongoose.model("users", User);
 const AdminModel = mongoose.model("admin", Admin);
 const CourseModel = mongoose.model("course", Course);
 const PurchaseModel = mongoose.model("purchasedCourses", Purchase);
 const ContentModel = mongoose.model("courseContent", ContentOfCourse);
+const FreeCourseModel = mongoose.model("freeContent", FreeCourses);
 
 //EXPORTING THE MODELS
 module.exports = {
@@ -75,4 +85,5 @@ module.exports = {
   CourseModel,
   PurchaseModel,
   ContentModel,
+  FreeCourseModel,
 };

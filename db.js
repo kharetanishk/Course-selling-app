@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
-const course = require("./router/course");
 const Schema = mongoose.Schema;
-const ObjectId = mongoose.Types.ObjectId;
 
 //user schema
 const User = new Schema({
@@ -9,10 +7,10 @@ const User = new Schema({
   password: String,
   firstName: String,
   lastName: String,
-  course: [
+  PurchasedCourses: [
     {
       type: mongoose.Types.ObjectId,
-      ref: "Course",
+      ref: "Purchase",
     },
   ],
 });

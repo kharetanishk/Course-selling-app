@@ -81,18 +81,26 @@ userRouter.post(
     }
   }
 );
+
+//user will purchase a course
 userRouter.post("/purchase", authMiddleware(secret), async function (req, res) {
   const userId = req.userId;
   console.log(userId + " " + "this is the user id");
   const { courseId } = req.body;
-  //AVOID TWICE BUYING THE SAME COURSE TWICE LOGIC IN FUTURE
-  //HERE YOU HAVE TO CREATE A PAYMENT GATEWAY OR CHECK THAT THE USER PAID OR NOT
   await PurchaseModel.create({
     userId: userId,
     courseId: courseId,
   });
+  await UserModel.updateOne(
+    {
+      _id: userId,
+    },
+    {
+      $push: { PurchasedCourses: courseId },
+    }
+  );
   res.status(200).json({
-    message: "THE COURSE HAn VE BEEN BUYED",
+    message: "THE COURSE HAVE BEEN BUYED",
   });
 });
 

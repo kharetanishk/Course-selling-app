@@ -87,6 +87,16 @@ userRouter.post("/purchase", authMiddleware(secret), async function (req, res) {
   const userId = req.userId;
   console.log(userId + " " + "this is the user id");
   const { courseId } = req.body;
+
+  const existingUser = await PurchaseModel.findOne({
+    userId: userId,
+    courseId: courseId,
+  });
+  if (existingUser) {
+    return res.status(400).json({
+      error: "You have already bought this course",
+    });
+  }
   await PurchaseModel.create({
     userId: userId,
     courseId: courseId,
@@ -106,23 +116,14 @@ userRouter.post("/purchase", authMiddleware(secret), async function (req, res) {
 
 userRouter.get("/purchase", authMiddleware(secret), async function (req, res) {
   const userId = req.userId;
-  console.log(userId);
   try {
-    const course = await PurchaseModel.find({
+    const purchasedCourse = await PurchaseModel.find({
       userId: userId,
     });
-    const courseId = await CourseModel.findById({
-      _id: course[0].courseId[0],
-    });
-
-    const courseName = courseId.title;
-    const coursePrice = courseId.price;
 
     res.status(200).json({
       message: "Here are the courses you have purchased",
-      course: course,
-      courseName: courseName,
-      coursePrice: coursePrice,
+      purchasedCourse: purchasedCourse,
     });
   } catch (error) {
     res.status(500).json({

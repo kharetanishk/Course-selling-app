@@ -176,7 +176,6 @@ adminRouter.get("/mycourse", authMiddleware(secret), async function (req, res) {
 adminRouter.put("/course", authMiddleware(secret), async function (req, res) {
   const { title, description, price, imageUrl } = req.body;
   const creatorId = req.userId;
-  const creatorName = creatorId.firstName;
 
   try {
     const user = await CourseModel.findOne({
@@ -194,11 +193,10 @@ adminRouter.put("/course", authMiddleware(secret), async function (req, res) {
         imageUrl: imageUrl,
       }
     );
-    console.log("the course have been updated");
+
     res.status(200).json({
       message: "the course have been updated",
-      courseId: course._id,
-      creatorName: creatorName,
+      course,
     });
   } catch (error) {
     res.status(400).json({
